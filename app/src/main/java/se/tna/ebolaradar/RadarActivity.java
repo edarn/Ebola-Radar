@@ -18,13 +18,18 @@ import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.FacebookDialog;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 
 public class RadarActivity extends Activity {
+    private static final int MAIN_TRACKER_ID = 1;
     int i = 0;
     ImageView radarView;
     View button;
     TextView headline, text;
+    Tracker mainTracker;
 
     Timer te;
     TimerTask tu;
@@ -51,12 +56,29 @@ public class RadarActivity extends Activity {
                         .setLink("https://play.google.com/store/apps/details?id=se.tna.ebolaradar")
                         .build();
                 uiHelper.trackPendingDialogCall(shareDialog.present());
+                if (mainTracker != null) {
+                    mainTracker.setScreenName("Share on Facebook");
+                    mainTracker.send(new HitBuilders.AppViewBuilder().build());
+                    /*mainTracker.send(new HitBuilders.EventBuilder()
+                                             .setCategory("User Actions")
+                                             .setAction("Press Button")
+                                             .setLabel("Share on Facebook")
+                                             .build());*/
+                }
+
             }
         });
 
         AdView adView = (AdView) this.findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
+
+        GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
+        mainTracker = analytics.newTracker(R.xml.global_tracker);
+        mainTracker.setAppId("UA-56762502-2");
+        mainTracker.enableAutoActivityTracking(true);
+        mainTracker.enableAdvertisingIdCollection(true);
+        mainTracker.enableExceptionReporting(true);
 
         progress.setMax(720);
     }
@@ -69,19 +91,11 @@ public class RadarActivity extends Activity {
         uiHelper.onActivityResult(requestCode, resultCode, data, new FacebookDialog.Callback() {
             @Override
             public void onError(FacebookDialog.PendingCall pendingCall, Exception error, Bundle data) {
-                Log.e("Activity", String.format("Dick Error: %s", error.toString()));
+
             }
 
             @Override
             public void onComplete(FacebookDialog.PendingCall pendingCall, Bundle data) {
-                Log.i("Activity", "Dick Success!");
-
-/*
-                FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(RadarActivity.this)
-                        .setLink("https://developers.facebook.com/android")
-                        .build();
-                uiHelper.trackPendingDialogCall(shareDialog.present());
-*/
 
             }
         });
@@ -107,6 +121,9 @@ public class RadarActivity extends Activity {
         headline.setVisibility(View.INVISIBLE);
         progress.setVisibility(View.VISIBLE);
         AppEventsLogger.activateApp(this);
+
+        mainTracker.setScreenName("Radar activity resumed.");
+        mainTracker.send(new HitBuilders.AppViewBuilder().build());
 
         te = new Timer();
         tu = new TimerTask() {
