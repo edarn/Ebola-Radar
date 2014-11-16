@@ -21,6 +21,8 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 
 
 public class RadarActivity extends Activity {
@@ -35,6 +37,7 @@ public class RadarActivity extends Activity {
     TimerTask tu;
     ProgressBar progress;
     private UiLifecycleHelper uiHelper;
+    private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +82,9 @@ public class RadarActivity extends Activity {
         mainTracker.enableAutoActivityTracking(true);
         mainTracker.enableAdvertisingIdCollection(true);
         mainTracker.enableExceptionReporting(true);
+
+        mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+        mMap.setMyLocationEnabled(true);
 
         progress.setMax(720);
     }
