@@ -71,13 +71,7 @@ public class RadarActivity extends Activity {
                 if (mainTracker != null) {
                     mainTracker.setScreenName("Share on Facebook");
                     mainTracker.send(new HitBuilders.AppViewBuilder().build());
-                    /*mainTracker.send(new HitBuilders.EventBuilder()
-                                             .setCategory("User Actions")
-                                             .setAction("Press Button")
-                                             .setLabel("Share on Facebook")
-                                             .build());*/
                 }
-
             }
         });
 
@@ -91,15 +85,6 @@ public class RadarActivity extends Activity {
         mainTracker.enableAutoActivityTracking(true);
         mainTracker.enableAdvertisingIdCollection(true);
         mainTracker.enableExceptionReporting(true);
-
-        mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-        mMap.getUiSettings().setZoomControlsEnabled(false);
-
-
-
-
-
-
 
         progress.setMax(720);
     }
@@ -171,6 +156,14 @@ public class RadarActivity extends Activity {
 
 
         te.scheduleAtFixedRate(tu, 1, 10);
+
+
+        mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+        if (mMap != null) {
+            mMap.getUiSettings().setZoomControlsEnabled(false);
+        }
+        mMap.getUiSettings().setZoomGesturesEnabled(false);
+        mMap.getUiSettings().setAllGesturesEnabled(false);
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Criteria criteria = new Criteria();
