@@ -43,14 +43,21 @@
 
             <FrameLayout android:layout_gravity="center_horizontal" android:layout_width="match_parent"
                          android:layout_height="wrap_content">
+
+
+                <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                          android:id="@+id/map"
+                          android:layout_width="300dp"
+                          android:layout_height="300dp"
+                          android:layout_gravity="center"
+                          android:name="com.google.android.gms.maps.MapFragment"/>
                 <ImageView
 
                         android:layout_width="300dp"
                         android:layout_height="300dp"
                         android:scaleType="fitXY"
                         android:layout_gravity="center_horizontal"
-                        android:src="@drawable/background_radar2"/>
-
+                        android:src="@drawable/background_radar4"/>
                 <ImageView
                         android:id="@+id/radar"
                         android:layout_width="300dp"
@@ -77,6 +84,8 @@
                           android:text="Share" android:textSize="25sp" android:textColor="#ffffff"/>
 
             </LinearLayout>
+
+
 
 
             <com.google.android.gms.ads.AdView android:id="@+id/adView"

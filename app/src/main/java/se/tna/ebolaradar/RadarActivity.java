@@ -4,8 +4,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.SyncStateContract;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,12 +20,18 @@ import android.widget.TextView;
 
 import com.facebook.AppEventsLogger;
 import com.facebook.UiLifecycleHelper;
+import com.facebook.model.GraphLocation;
 import com.facebook.widget.FacebookDialog;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 
 
 public class RadarActivity extends Activity {
@@ -35,6 +46,7 @@ public class RadarActivity extends Activity {
     TimerTask tu;
     ProgressBar progress;
     private UiLifecycleHelper uiHelper;
+    private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,13 +71,7 @@ public class RadarActivity extends Activity {
                 if (mainTracker != null) {
                     mainTracker.setScreenName("Share on Facebook");
                     mainTracker.send(new HitBuilders.AppViewBuilder().build());
-                    /*mainTracker.send(new HitBuilders.EventBuilder()
-                                             .setCategory("User Actions")
-                                             .setAction("Press Button")
-                                             .setLabel("Share on Facebook")
-                                             .build());*/
                 }
-
             }
         });
 
@@ -150,6 +156,35 @@ public class RadarActivity extends Activity {
 
 
         te.scheduleAtFixedRate(tu, 1, 10);
+
+
+        mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+        if (mMap != null) {
+            mMap.getUiSettings().setZoomControlsEnabled(false);
+        }
+        mMap.getUiSettings().setZoomGesturesEnabled(false);
+        mMap.getUiSettings().setAllGesturesEnabled(false);
+
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+
+
+        Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        if (location != null)
+        {
+
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(location.getLatitude(), location.getLongitude()), 13));
+
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to location user
+                    .zoom(15)                   // Sets the zoom
+                    .bearing(0)                // Sets the orientation of the camera to east
+                    .build();                   // Creates a CameraPosition from the builder
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+        }
+
     }
 
     @Override
