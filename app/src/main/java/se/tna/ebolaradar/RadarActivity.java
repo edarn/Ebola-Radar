@@ -10,8 +10,6 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.provider.SyncStateContract;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -161,16 +159,17 @@ public class RadarActivity extends Activity {
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         if (mMap != null) {
             mMap.getUiSettings().setZoomControlsEnabled(false);
+            mMap.getUiSettings().setZoomGesturesEnabled(false);
+            mMap.getUiSettings().setAllGesturesEnabled(false);
         }
-        mMap.getUiSettings().setZoomGesturesEnabled(false);
-        mMap.getUiSettings().setAllGesturesEnabled(false);
+
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Criteria criteria = new Criteria();
 
 
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        if (location != null)
+        if (location != null && mMap != null)
         {
 
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
