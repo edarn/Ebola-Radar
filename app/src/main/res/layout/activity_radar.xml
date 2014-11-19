@@ -4,12 +4,20 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:background="#000000">
+
+    <com.google.android.gms.ads.AdView android:id="@+id/adView"
+                                       android:layout_width="match_parent"
+                                       android:layout_height="wrap_content"
+                                       android:layout_gravity="bottom"
+                                       ads:adSize="BANNER"
+                                       ads:adUnitId="ca-app-pub-0138803691600797/9416894494"/>
     <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                       android:orientation="vertical">
             <FrameLayout android:layout_gravity="center_horizontal" android:layout_width="match_parent"
                          android:layout_height="wrap_content">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                              android:layout_marginBottom="10dp"
                               android:orientation="vertical">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                               android:id="@+id/headline"
@@ -35,38 +43,39 @@
                              android:layout_gravity="center"/>
             </FrameLayout>
 
-            <FrameLayout android:layout_gravity="center_horizontal" android:layout_width="250dp"
-                         android:layout_height="250dp">
+            <RelativeLayout android:layout_gravity="center_horizontal" android:layout_width="300dp"
+                         android:layout_height="300dp">
 
 
               <fragment   android:id="@+id/map"
-                          android:layout_width="250dp"
-                          android:layout_height="250dp"
+                          android:layout_width="300dp"
+                          android:layout_height="300dp"
                           android:layout_gravity="center"
                           android:name="com.google.android.gms.maps.MapFragment"/>
                <ImageView
 
-                        android:layout_width="250dp"
-                        android:layout_height="250dp"
-                        android:scaleType="fitCenter"
+                        android:layout_width="300dp"
+                        android:layout_height="300dp"
+                        android:scaleType="fitXY"
                         android:layout_gravity="center"
+
                         android:src="@drawable/background_radar4"/>
                 <ImageView
                         android:id="@+id/radar"
-                        android:layout_width="250dp"
-                        android:layout_height="250dp"
-                        android:scaleType="fitCenter"
+                        android:layout_width="300dp"
+                        android:layout_height="300dp"
+                        android:scaleType="fitXY"
                         android:layout_gravity="center"
                         android:src="@drawable/radar_screen2"/>
 
-            </FrameLayout>
+            </RelativeLayout>
 
             <LinearLayout android:id="@+id/button" android:layout_gravity="center_horizontal"
                           android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
                           android:background="#222266"
                           android:layout_marginBottom="10dp"
-                          android:layout_marginTop="35dp"
+                          android:layout_marginTop="10dp"
 
                           android:gravity="bottom|center_vertical">
 
@@ -74,16 +83,12 @@
                            android:src="@drawable/logo_facebook_transparent" android:scaleType="centerInside"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                           android:layout_marginLeft="10dp"
+                          android:layout_gravity="center_vertical"
                           android:text="Share" android:textSize="25sp" android:textColor="#ffffff"/>
 
             </LinearLayout>
 
-            <com.google.android.gms.ads.AdView android:id="@+id/adView"
-                                               android:layout_width="match_parent"
-                                               android:layout_height="wrap_content"
-                                               android:layout_gravity="bottom"
-                                               ads:adSize="BANNER"
-                                               ads:adUnitId="ca-app-pub-0138803691600797/9416894494"/>
+
 
         </LinearLayout>
     </ScrollView>

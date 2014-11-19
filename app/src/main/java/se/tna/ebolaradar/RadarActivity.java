@@ -74,6 +74,7 @@ public class RadarActivity extends Activity {
         });
 
         AdView adView = (AdView) this.findViewById(R.id.adView);
+        adView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
 
