@@ -5,7 +5,7 @@
     <!-- Enable automatic Activity measurement -->
     <bool name="ga_autoActivityTracking">true</bool>
 
-    <screenName name="se.tna.ebolaradar.RadarActivity">Main Radar Activity</screenName>
+    <screenName name="se.tna.getluckyradar.RadarActivity">Get Lucky Main Activity</screenName>
     <!--  The following value should be replaced with correct property id. -->
     <string name="ga_trackingId">UA-56762502-2</string>
 </resources>

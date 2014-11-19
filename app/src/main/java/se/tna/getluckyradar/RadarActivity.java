@@ -1,4 +1,4 @@
-package se.tna.ebolaradar;
+package se.tna.getluckyradar;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -18,7 +18,6 @@ import android.widget.TextView;
 
 import com.facebook.AppEventsLogger;
 import com.facebook.UiLifecycleHelper;
-import com.facebook.model.GraphLocation;
 import com.facebook.widget.FacebookDialog;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -63,7 +62,8 @@ public class RadarActivity extends Activity {
             @Override
             public void onClick(View v) {
                 FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(RadarActivity.this)
-                        .setLink("https://play.google.com/store/apps/details?id=se.tna.ebolaradar")
+                        .setLink("https://play.google.com/store/apps/details?id=se.tna.getluckyradar")
+                        .setDescription("I have a 85% chance to Get Lucky tonight, what´s your chance?")
                         .build();
                 uiHelper.trackPendingDialogCall(shareDialog.present());
                 if (mainTracker != null) {
@@ -80,7 +80,7 @@ public class RadarActivity extends Activity {
 
         GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
         mainTracker = analytics.newTracker(R.xml.global_tracker);
-        mainTracker.setAppId("UA-56762502-2");
+        mainTracker.setAppId("UA-56762502-3");
         mainTracker.enableAutoActivityTracking(true);
         mainTracker.enableAdvertisingIdCollection(true);
         mainTracker.enableExceptionReporting(true);
@@ -126,9 +126,6 @@ public class RadarActivity extends Activity {
         headline.setVisibility(View.INVISIBLE);
         progress.setVisibility(View.VISIBLE);
         AppEventsLogger.activateApp(this);
-
-        mainTracker.setScreenName("Radar activity resumed.");
-        mainTracker.send(new HitBuilders.AppViewBuilder().build());
 
         te = new Timer();
         tu = new TimerTask() {
