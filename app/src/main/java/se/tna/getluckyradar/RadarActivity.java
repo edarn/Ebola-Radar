@@ -16,9 +16,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.facebook.AppEventsLogger;
@@ -40,15 +40,24 @@ public class RadarActivity extends Activity {
     private static final int MAIN_TRACKER_ID = 1;
     int i = 0;
     ImageView radarView;
+    ImageView redButton;
     View button;
     TextView headline, text;
     Tracker mainTracker;
+    TextView debug;
 
     Timer te;
     TimerTask tu;
     ProgressBar progress;
     private UiLifecycleHelper uiHelper;
     private GoogleMap mMap;
+
+    RelativeLayout.LayoutParams redLayout;
+
+    float[] mValuesMagnet = new float[3];
+    float[] mValuesAccel = new float[3];
+    float[] mValuesOrientation = new float[3];
+    float[] mRotationMatrix = new float[9];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,19 +68,17 @@ public class RadarActivity extends Activity {
         uiHelper.onCreate(savedInstanceState);
         progress = (ProgressBar) findViewById(R.id.progress);
         radarView = (ImageView) findViewById(R.id.radar);
+        redButton = (ImageView) findViewById(R.id.redIcon);
+        redLayout = (RelativeLayout.LayoutParams) redButton.getLayoutParams();
+
         headline = (TextView) findViewById(R.id.headline);
         text = (TextView) findViewById(R.id.text);
         button = findViewById(R.id.button);
         button.setClickable(true);
 
-
+        debug = (TextView) findViewById(R.id.debug);
 
         SensorManager sensorManager = (SensorManager) this.getSystemService(SENSOR_SERVICE);
-
-        final float[] mValuesMagnet      = new float[3];
-        final float[] mValuesAccel       = new float[3];
-        final float[] mValuesOrientation = new float[3];
-        final float[] mRotationMatrix    = new float[9];
 
         final SensorEventListener mEventListener = new SensorEventListener() {
             public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -88,20 +95,19 @@ public class RadarActivity extends Activity {
                         System.arraycopy(event.values, 0, mValuesMagnet, 0, 3);
                         break;
                 }
-            };
+            }
+
+            ;
         };
 
         // You have set the event lisetner up, now just need to register this with the
         // sensor manager along with the sensor wanted.
         setListners(sensorManager, mEventListener);
 
-
-
-
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-/*
+
                 FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(RadarActivity.this)
                         .setLink("https://play.google.com/store/apps/details?id=se.tna.getluckyradar")
                         .setDescription("I have a 85% chance to Get Lucky tonight, what´s your chance?")
@@ -111,14 +117,6 @@ public class RadarActivity extends Activity {
                     mainTracker.setScreenName("Share on Facebook");
                     mainTracker.send(new HitBuilders.AppViewBuilder().build());
                 }
-*/
-
-                SensorManager.getRotationMatrix(mRotationMatrix, null, mValuesAccel, mValuesMagnet);
-                SensorManager.getOrientation(mRotationMatrix, mValuesOrientation);
-                final CharSequence test;
-                test = "results: " + mValuesOrientation[0] +" "+mValuesOrientation[1]+ " "+ mValuesOrientation[2];
-                System.out.println(test);
-
 
 
             }
@@ -139,24 +137,15 @@ public class RadarActivity extends Activity {
         progress.setMax(720);
 
 
-
-
-
-
-
-}
+    }
 
     // Register the event listener and sensor type.
-    public void setListners(SensorManager sensorManager, SensorEventListener mEventListener)
-    {
+    public void setListners(SensorManager sensorManager, SensorEventListener mEventListener) {
         sensorManager.registerListener(mEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                                        SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(mEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
                                        SensorManager.SENSOR_DELAY_NORMAL);
     }
-
-
-
 
 
     @Override
@@ -215,14 +204,28 @@ public class RadarActivity extends Activity {
                             progress.setVisibility(View.GONE);
 
                         }
+
+                        SensorManager.getRotationMatrix(mRotationMatrix, null, mValuesAccel, mValuesMagnet);
+                        SensorManager.getOrientation(mRotationMatrix, mValuesOrientation);
+                        final CharSequence test;
+                        double leftMargin = (mValuesOrientation[2]*1.5 / Math.PI + 0.5);
+                        double topMargin = -(mValuesOrientation[1]*1.5 / Math.PI - 0.5);
+                        test = "results: X" + String.format("%.2f", leftMargin) + " Y "
+                                + String.format("%.2f", topMargin);
+                        debug.setText(test);
+
+                        redLayout.topMargin = (int) (topMargin * 885);
+                        redLayout.leftMargin = (int) (leftMargin * 885);
+                        redButton.setLayoutParams(redLayout);
+                        redButton.invalidate();
+
+
                     }
                 });
             }
         };
 
-
         te.scheduleAtFixedRate(tu, 1, 10);
-
 
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         if (mMap != null) {
@@ -231,14 +234,11 @@ public class RadarActivity extends Activity {
             mMap.getUiSettings().setAllGesturesEnabled(false);
         }
 
-
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Criteria criteria = new Criteria();
 
-
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        if (location != null && mMap != null)
-        {
+        if (location != null && mMap != null) {
 
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(location.getLatitude(), location.getLongitude()), 13));

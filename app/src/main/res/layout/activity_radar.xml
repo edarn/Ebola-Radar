@@ -11,6 +11,8 @@
                                        android:layout_gravity="bottom"
                                        ads:adSize="BANNER"
                                        ads:adUnitId="ca-app-pub-0138803691600797/9416894494"/>
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/debug"/>
+
     <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                       android:orientation="vertical">
@@ -54,7 +56,8 @@
                           android:layout_height="300dp"
                           android:layout_gravity="center"
                           android:name="com.google.android.gms.maps.MapFragment"/>
-               <ImageView
+
+                <ImageView
 
                         android:layout_width="300dp"
                         android:layout_height="300dp"
@@ -62,6 +65,8 @@
                         android:layout_gravity="center"
 
                         android:src="@drawable/background_radar4"/>
+
+
                 <ImageView
                         android:id="@+id/radar"
                         android:layout_width="300dp"
@@ -69,6 +74,12 @@
                         android:scaleType="fitXY"
                         android:layout_gravity="center"
                         android:src="@drawable/radar_screen2"/>
+                <ImageView
+                        android:id="@+id/redIcon"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/icon_red"/>
 
             </RelativeLayout>
 
