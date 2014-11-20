@@ -210,14 +210,26 @@ public class RadarActivity extends Activity {
                         final CharSequence test;
                         double leftMargin = (mValuesOrientation[2]*1.5 / Math.PI + 0.5);
                         double topMargin = -(mValuesOrientation[1]*1.5 / Math.PI - 0.5);
-                        test = "results: X" + String.format("%.2f", leftMargin) + " Y "
-                                + String.format("%.2f", topMargin);
+
+                        double x = mValuesOrientation[2];
+                        double y = mValuesOrientation[1];
+                        double angle = Math.atan(y/x);
+
+                        double angi = Math.asin(x/(Math.sqrt(x*x+y*y)));
+                        angle = angle * 180/Math.PI;
+
+                        test = "results: " +  String.format("%.2f", angi) + " X" + String.format("%.2f", leftMargin) + " Y "
+                                + String.format("%.2f", topMargin) + String.format(" X = %.2f", x) + String.format(" Y = %.2f",y);
                         debug.setText(test);
 
                         redLayout.topMargin = (int) (topMargin * 885);
                         redLayout.leftMargin = (int) (leftMargin * 885);
                         redButton.setLayoutParams(redLayout);
                         redButton.invalidate();
+
+
+
+
 
 
                     }
