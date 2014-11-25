@@ -14,6 +14,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.*;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -21,6 +22,10 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.amazon.device.associates.AssociatesAPI;
+import com.amazon.device.associates.LinkService;
+import com.amazon.device.associates.NotInitializedException;
+import com.amazon.device.associates.OpenSearchPageRequest;
 import com.facebook.AppEventsLogger;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.FacebookDialog;
@@ -34,6 +39,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.amazon.device.ads.*;
 
 
 public class RadarActivity extends Activity {
@@ -51,6 +57,11 @@ public class RadarActivity extends Activity {
     ProgressBar progress;
     private UiLifecycleHelper uiHelper;
     private GoogleMap mMap;
+
+    private static final String APP_KEY = "6545a6092733453b9c8a9f7efea6a3ba"; // Sample Application Key. Replace this value with your Application Key.
+    final java.lang.String LOG_TAG = "GetLucky";
+    private AdLayout amazonAd;
+
 
     RelativeLayout.LayoutParams redLayout;
 
@@ -117,8 +128,20 @@ public class RadarActivity extends Activity {
                     mainTracker.setScreenName("Share on Facebook");
                     mainTracker.send(new HitBuilders.AppViewBuilder().build());
                 }
+            }
+        });
 
+        TextView amazonButton = (TextView) findViewById(R.id.amazonButton);
+        amazonButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                OpenSearchPageRequest request = new OpenSearchPageRequest("ebola");
+                try {
+                    LinkService linkService = AssociatesAPI.getLinkService();
+                    linkService.openRetailPage(request);
+                } catch (NotInitializedException e) {
 
+                }
             }
         });
 
@@ -135,6 +158,25 @@ public class RadarActivity extends Activity {
         mainTracker.enableExceptionReporting(true);
 
         progress.setMax(720);
+
+
+        // For debugging purposes enable logging, but disable for production builds.
+        AdRegistration.enableLogging(false);
+        // For debugging purposes flag all ad requests as tests, but set to false for production builds.
+        AdRegistration.enableTesting(false);
+
+
+        amazonAd = (AdLayout) findViewById(R.id.ad_view);
+        amazonAd.setListener(new SampleAdListener());
+        try {
+            AdRegistration.setAppKey(APP_KEY);
+        } catch (final IllegalArgumentException e) {
+            Log.e(LOG_TAG, "IllegalArgumentException thrown: " + e.toString());
+            return;
+        }
+
+        amazonAd.loadAd();
+        AssociatesAPI.initialize(new AssociatesAPI.Config(APP_KEY, this));
 
 
     }
@@ -285,5 +327,40 @@ public class RadarActivity extends Activity {
     public void onDestroy() {
         super.onDestroy();
         uiHelper.onDestroy();
+    }
+    class SampleAdListener extends DefaultAdListener {
+        /**
+         * This event is called once an ad loads successfully.
+         */
+        @Override
+        public void onAdLoaded(final Ad ad, final AdProperties adProperties) {
+            Log.i(LOG_TAG, adProperties.getAdType().toString() + " ad loaded successfully.");
+        }
+
+        /**
+         * This event is called if an ad fails to load.
+         */
+        @Override
+        public void onAdFailedToLoad(final Ad ad, final AdError error) {
+            Log.w(LOG_TAG, "Ad failed to load. Code: " + error.getCode() + ", Message: " + error.getMessage());
+        }
+
+        /**
+         * This event is called after a rich media ad expands.
+         */
+        @Override
+        public void onAdExpanded(final Ad ad) {
+            Log.i(LOG_TAG, "Ad expanded.");
+            // You may want to pause your activity here.
+        }
+
+        /**
+         * This event is called after a rich media ad has collapsed from an expanded state.
+         */
+        @Override
+        public void onAdCollapsed(final Ad ad) {
+            Log.i(LOG_TAG, "Ad collapsed.");
+            // Resume your activity here, if it was paused in onAdExpanded.
+        }
     }
 }

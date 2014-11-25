@@ -21,6 +21,8 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile files('libs/amazon-ads-5.4.227.jar')
+    compile files('libs/amazon-mobile-associates-1.0.64.0.jar')
     compile 'com.android.support:support-v4:21+'
     compile 'com.google.android.gms:play-services:5.+'
 
