@@ -7,5 +7,5 @@
 
     <screenName name="se.tna.getluckyradar.RadarActivity">Get Lucky Main Activity</screenName>
     <!--  The following value should be replaced with correct property id. -->
-    <string name="ga_trackingId">UA-56762502-2</string>
+    <string name="ga_trackingId">UA-56762502-3</string>
 </resources>

@@ -178,7 +178,7 @@ public class RadarActivity extends Activity {
         amazonButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                OpenSearchPageRequest request = new OpenSearchPageRequest("ebola");
+                OpenSearchPageRequest request = new OpenSearchPageRequest("flirt");
                 try {
                     LinkService linkService = AssociatesAPI.getLinkService();
                     linkService.openRetailPage(request);
