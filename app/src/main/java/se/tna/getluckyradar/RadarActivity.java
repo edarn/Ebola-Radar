@@ -4,24 +4,29 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Activity;
-import android.content.Context;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.*;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.amazon.device.ads.Ad;
+import com.amazon.device.ads.AdError;
+import com.amazon.device.ads.AdLayout;
+import com.amazon.device.ads.AdProperties;
+import com.amazon.device.ads.AdRegistration;
+import com.amazon.device.ads.DefaultAdListener;
 import com.amazon.device.associates.AssociatesAPI;
 import com.amazon.device.associates.LinkService;
 import com.amazon.device.associates.NotInitializedException;
@@ -29,17 +34,10 @@ import com.amazon.device.associates.OpenSearchPageRequest;
 import com.facebook.AppEventsLogger;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.FacebookDialog;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.amazon.device.ads.*;
 
 
 public class RadarActivity extends Activity {
@@ -47,10 +45,11 @@ public class RadarActivity extends Activity {
     int i = 0;
     ImageView radarView;
     ImageView redButton;
+    ImageView retry;
+
     View button;
     TextView headline, text;
     Tracker mainTracker;
-    TextView debug;
 
     Timer te;
     TimerTask tu;
@@ -70,6 +69,8 @@ public class RadarActivity extends Activity {
     float[] mValuesOrientation = new float[3];
     float[] mRotationMatrix = new float[9];
 
+    double chance = Math.random() * 80 + 10;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,14 +81,56 @@ public class RadarActivity extends Activity {
         progress = (ProgressBar) findViewById(R.id.progress);
         radarView = (ImageView) findViewById(R.id.radar);
         redButton = (ImageView) findViewById(R.id.redIcon);
+        retry = (ImageView) findViewById(R.id.retry);
         redLayout = (RelativeLayout.LayoutParams) redButton.getLayoutParams();
+
+        retry.setClickable(true);
+        retry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                restart();
+            }
+        });
+
+        redButton.setClickable(true);
+        redButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog ad = new AlertDialog.Builder(RadarActivity.this).create();
+                ad.setCancelable(false); // This blocks the 'BACK' button
+                ad.setMessage(String.format("We sense there is a %.1f chance that you will get lucky with this person!", chance));
+                ad.setButton(DialogInterface.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                ad.setButton(DialogInterface.BUTTON_POSITIVE, "Share on Facebook", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(RadarActivity.this)
+                                .setLink("https://play.google.com/store/apps/details?id=se.tna.getluckyradar")
+                                .setCaption(String.format("I have a %.1f chance to Get Lucky tonight, what´s your chance?", chance))
+                                .setDescription("Download the Get Lucky app to improve your chances to Get Lucky!")
+                                .build();
+                        uiHelper.trackPendingDialogCall(shareDialog.present());
+                        if (mainTracker != null) {
+                            mainTracker.setScreenName("Share Lucky Result on Facebook");
+                            mainTracker.send(new HitBuilders.AppViewBuilder().build());
+                        }
+                    }
+                });
+                ad.show();
+            }
+        });
+
+        redButton.setAlpha(0f);
 
         headline = (TextView) findViewById(R.id.headline);
         text = (TextView) findViewById(R.id.text);
         button = findViewById(R.id.button);
         button.setClickable(true);
-
-        debug = (TextView) findViewById(R.id.debug);
 
         SensorManager sensorManager = (SensorManager) this.getSystemService(SENSOR_SERVICE);
 
@@ -145,10 +188,12 @@ public class RadarActivity extends Activity {
             }
         });
 
+        /*
         AdView adView = (AdView) this.findViewById(R.id.adView);
         adView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
+        */
 
         GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
         mainTracker = analytics.newTracker(R.xml.global_tracker);
@@ -157,14 +202,12 @@ public class RadarActivity extends Activity {
         mainTracker.enableAdvertisingIdCollection(true);
         mainTracker.enableExceptionReporting(true);
 
-        progress.setMax(720);
-
+        progress.setMax(1080);
 
         // For debugging purposes enable logging, but disable for production builds.
         AdRegistration.enableLogging(false);
         // For debugging purposes flag all ad requests as tests, but set to false for production builds.
         AdRegistration.enableTesting(false);
-
 
         amazonAd = (AdLayout) findViewById(R.id.ad_view);
         amazonAd.setListener(new SampleAdListener());
@@ -218,16 +261,21 @@ public class RadarActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        uiHelper.onResume();
-        i = 0;
+    private void restart() {
+        radarView.setVisibility(View.VISIBLE);
+        chance = Math.random() * 80 + 10;
+        randomizer = Math.random() - 0.5;
         text.setVisibility(View.INVISIBLE);
         headline.setVisibility(View.INVISIBLE);
         progress.setVisibility(View.VISIBLE);
-        AppEventsLogger.activateApp(this);
-
+        redButton.setAlpha(0f);
+        if (te != null) {
+            te.cancel();
+        }
+        if (tu != null) {
+            tu.cancel();
+        }
+        i = 0;
         te = new Timer();
         tu = new TimerTask() {
 
@@ -240,7 +288,14 @@ public class RadarActivity extends Activity {
                         radarView.setRotation(i);
                         i += 1;
                         progress.setProgress(i);
-                        if (i == 720) {
+
+                        if (i == 1080) {
+                            te.cancel();
+                            tu.cancel();
+                            animation1.cancel();
+                            redButton.setAlpha(1f);
+                            redButton.setVisibility(View.VISIBLE);
+                            radarView.setVisibility(View.INVISIBLE);
                             text.setVisibility(View.VISIBLE);
                             headline.setVisibility(View.VISIBLE);
                             progress.setVisibility(View.GONE);
@@ -250,28 +305,38 @@ public class RadarActivity extends Activity {
                         SensorManager.getRotationMatrix(mRotationMatrix, null, mValuesAccel, mValuesMagnet);
                         SensorManager.getOrientation(mRotationMatrix, mValuesOrientation);
                         final CharSequence test;
-                        double leftMargin = (mValuesOrientation[2]*1.5 / Math.PI + 0.5);
-                        double topMargin = -(mValuesOrientation[1]*1.5 / Math.PI - 0.5);
+
+                        mValuesOrientation[1] += 0.9;
+                        mValuesOrientation[2] += randomizer;
+                        double leftMargin = (mValuesOrientation[2] / Math.PI + 0.5);
+                        double topMargin = -(mValuesOrientation[1] / Math.PI - 0.5);
 
                         double x = mValuesOrientation[2];
                         double y = mValuesOrientation[1];
-                        double angle = Math.atan(y/x);
+                        double angle = Math.atan(Math.abs(x) / Math.abs(y));
+                        if (x > 0 && y < 0) {
+                            angle = Math.atan(Math.abs(y) / Math.abs(x));
+                            angle += Math.PI / 2f;
+                        } else if (x < 0 && y < 0) {
+                            angle += Math.PI;
+                        } else if (x < 0 && y > 0) {
+                            angle = Math.atan(Math.abs(y) / Math.abs(x));
+                            angle += Math.PI + Math.PI / 2f;
+                        }
 
-                        double angi = Math.asin(x/(Math.sqrt(x*x+y*y)));
-                        angle = angle * 180/Math.PI;
+                        angle = angle * 180 / Math.PI;
 
-                        test = "results: " +  String.format("%.2f", angi) + " X" + String.format("%.2f", leftMargin) + " Y "
-                                + String.format("%.2f", topMargin) + String.format(" X = %.2f", x) + String.format(" Y = %.2f",y);
-                        debug.setText(test);
-
-                        redLayout.topMargin = (int) (topMargin * 885);
-                        redLayout.leftMargin = (int) (leftMargin * 885);
-                        redButton.setLayoutParams(redLayout);
-                        redButton.invalidate();
-
-
-
-
+                        if (Math.round(angle) == i % 360) {
+                            redLayout.topMargin = (int) (topMargin * 885);
+                            redLayout.leftMargin = (int) (leftMargin * 885);
+                            redButton.setLayoutParams(redLayout);
+                            redButton.invalidate();
+                            redButton.setAlpha(1f);
+                            animation1 = new AlphaAnimation(1.0f, 0f);
+                            animation1.setDuration(4000);
+                            animation1.setFillAfter(true);
+                            redButton.startAnimation(animation1);
+                        }
 
 
                     }
@@ -281,6 +346,20 @@ public class RadarActivity extends Activity {
 
         te.scheduleAtFixedRate(tu, 1, 10);
 
+
+    }
+
+    AlphaAnimation animation1;
+    double randomizer = Math.random() - 0.5;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        uiHelper.onResume();
+        AppEventsLogger.activateApp(this);
+        restart();
+
+        /*
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         if (mMap != null) {
             mMap.getUiSettings().setZoomControlsEnabled(false);
@@ -289,7 +368,6 @@ public class RadarActivity extends Activity {
         }
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        Criteria criteria = new Criteria();
 
         Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         if (location != null && mMap != null) {
@@ -303,9 +381,8 @@ public class RadarActivity extends Activity {
                     .bearing(0)                // Sets the orientation of the camera to east
                     .build();                   // Creates a CameraPosition from the builder
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
         }
-
+        */
     }
 
     @Override
@@ -328,6 +405,7 @@ public class RadarActivity extends Activity {
         super.onDestroy();
         uiHelper.onDestroy();
     }
+
     class SampleAdListener extends DefaultAdListener {
         /**
          * This event is called once an ad loads successfully.
