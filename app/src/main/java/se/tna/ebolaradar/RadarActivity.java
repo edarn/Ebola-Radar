@@ -74,6 +74,8 @@ public class RadarActivity extends Activity {
             public void onClick(View v) {
                 FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(RadarActivity.this)
                         .setLink("https://play.google.com/store/apps/details?id=se.tna.ebolaradar")
+                        .setDescription("Stay safe and prepared against evil viruses.")
+                        .setCaption("Try it now!")
                         .build();
                 uiHelper.trackPendingDialogCall(shareDialog.present());
                 if (mainTracker != null) {

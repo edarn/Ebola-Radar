@@ -23,7 +23,7 @@
                               android:id="@+id/headline"
                               android:text="You are safe!"
                               android:layout_gravity="center_horizontal"
-                              android:textColor="#ffffff"
+                              android:textColor="#ff0000"
                               android:visibility="invisible"
                               android:textSize="22sp"
                             />
@@ -32,7 +32,7 @@
                               android:id="@+id/text"
                               android:text="No ebola infected persons could be found."
                               android:layout_gravity="center_horizontal"
-                              android:textColor="#ffffff"
+                              android:textColor="#00ff00"
                               android:visibility="invisible"
                               android:textSize="14sp"
                             />
