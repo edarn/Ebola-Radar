@@ -78,6 +78,7 @@ public class RadarActivity extends Activity {
         retry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Ads.trackScreenName("Rescan initiated");
                 restart();
             }
         });
@@ -88,7 +89,7 @@ public class RadarActivity extends Activity {
             public void onClick(View view) {
                 AlertDialog ad = new AlertDialog.Builder(RadarActivity.this).create();
                 ad.setCancelable(false); // This blocks the 'BACK' button
-                ad.setMessage(String.format("We sense there is a %.1f chance that you will get lucky with this person!", chance));
+                ad.setMessage(String.format("There is a %.1f%% chance that you will get lucky with this attractive person!", chance));
                 ad.setButton(DialogInterface.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -101,7 +102,7 @@ public class RadarActivity extends Activity {
 
                         FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(RadarActivity.this)
                                 .setLink("https://play.google.com/store/apps/details?id=se.tna.getluckyradar")
-                                .setCaption(String.format("I have a %.1f chance to Get Lucky tonight, what´s your chance?", chance))
+                                .setCaption(String.format("I have a %.1f%% chance to Get Lucky tonight, what´s your chance?", chance))
                                 .setDescription("Download the Get Lucky app to improve your chances to Get Lucky!")
                                 .build();
                         uiHelper.trackPendingDialogCall(shareDialog.present());
@@ -151,11 +152,11 @@ public class RadarActivity extends Activity {
 
                 FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(RadarActivity.this)
                         .setLink("https://play.google.com/store/apps/details?id=se.tna.getluckyradar")
-                        .setDescription("I have a 85% chance to Get Lucky tonight, what´s your chance?")
+                        .setCaption(String.format("I have a %.1f%% chance to Get Lucky tonight, what´s your chance?", chance))
+                        .setDescription("Download the Get Lucky app to improve your chances to Get Lucky!")
                         .build();
                 uiHelper.trackPendingDialogCall(shareDialog.present());
                 Ads.trackScreenName("Share on Facebook");
-
             }
         });
 
@@ -163,6 +164,7 @@ public class RadarActivity extends Activity {
         amazonButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Ads.trackScreenName("Amazon search flirt");
                 OpenSearchPageRequest request = new OpenSearchPageRequest("flirt");
                 try {
                     LinkService linkService = AssociatesAPI.getLinkService();
@@ -173,9 +175,9 @@ public class RadarActivity extends Activity {
             }
         });
 
-        //Ads.setupGoogleAdwords(this, R.id.ad_view);
+        Ads.setupGoogleAdwords(this, R.id.googleAdView);
         Ads.setupGoogleAnalytics(this, "UA-56762502-3");
-        Ads.setupAmazonAds(this, APP_KEY, R.id.ad_view);
+        Ads.setupAmazonAds(this, APP_KEY, R.id.amazonAdView);
     }
 
 
@@ -356,6 +358,4 @@ public class RadarActivity extends Activity {
         super.onDestroy();
         uiHelper.onDestroy();
     }
-
-
 }
