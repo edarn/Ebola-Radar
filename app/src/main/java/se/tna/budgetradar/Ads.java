@@ -1,7 +1,6 @@
-package se.tna.getluckyradar;
+package se.tna.budgetradar;
 
 import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
 import android.view.View;
 

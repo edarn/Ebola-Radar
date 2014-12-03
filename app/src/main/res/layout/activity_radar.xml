@@ -10,7 +10,7 @@
                                        android:layout_height="wrap_content"
                                        android:layout_gravity="bottom"
                                        ads:adSize="BANNER"
-                                       ads:adUnitId="ca-app-pub-0138803691600797/9416894494"/>
+                                       ads:adUnitId="ca-app-pub-0138803691600797/5395700498"/>
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/debug"/>
 
     <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
@@ -23,16 +23,15 @@
                               android:orientation="vertical">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                               android:id="@+id/headline"
-                              android:text="You could get lucky!"
+                              android:text="Det KAN finnas en lösning!"
                               android:layout_gravity="center_horizontal"
                               android:textColor="#ff0000"
-                              android:visibility="invisible"
                               android:textSize="22sp"
                             />
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                               android:id="@+id/text"
-                              android:text="Click on the red dot to find out your chances."
+                              android:text="Tryck på den röda cirkeln för att få veta mer."
                               android:layout_gravity="center_horizontal"
                               android:textColor="#00ff00"
                               android:visibility="invisible"
@@ -41,21 +40,22 @@
                               android:textSize="14sp"
                             />
                 </LinearLayout>
-                <ProgressBar android:layout_width="match_parent" android:layout_height="wrap_content"
-                             style="@android:style/Widget.ProgressBar.Horizontal"
-                             android:id="@+id/progress"
-                             android:layout_gravity="center"/>
             </FrameLayout>
+
+            <ProgressBar android:layout_width="match_parent" android:layout_height="wrap_content"
+                         style="@android:style/Widget.ProgressBar.Horizontal"
+                         android:id="@+id/progress"
+                         android:layout_gravity="center"/>
 
             <RelativeLayout android:layout_gravity="center_horizontal" android:layout_width="300dp"
                             android:layout_height="300dp">
 
 
-               <!-- <fragment android:id="@+id/map"
+                <fragment android:id="@+id/map"
                           android:layout_width="300dp"
                           android:layout_height="300dp"
                           android:layout_gravity="center"
-                          android:name="com.google.android.gms.maps.MapFragment"/> -->
+                          android:name="com.google.android.gms.maps.MapFragment"/>
                 <ImageView android:layout_width="300dp" android:layout_height="300dp" android:background="#ffffff"/>
 
                 <ImageView
@@ -107,7 +107,7 @@
 
                 </LinearLayout>
 
-
+            <!--
                 <TextView android:id="@+id/amazonButton" android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
                           android:layout_marginLeft="10dp"
@@ -116,11 +116,13 @@
                           android:drawableBottom="@drawable/amazonbutton"
 
                           android:text="Learn More" android:textSize="18sp" android:textColor="#ffffff"/>
+            -->
             </LinearLayout>
+            <!--
             <com.amazon.device.ads.AdLayout
                     android:id="@+id/amazonAdView"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"/> -->
 
         </LinearLayout>
     </ScrollView>

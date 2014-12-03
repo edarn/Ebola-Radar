@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="se.tna.getluckyradar">
+          package="se.tna.budgetradar">
     <uses-feature
             android:glEsVersion="0x00020000"
             android:required="true"/>
@@ -27,11 +27,11 @@
 
         <meta-data
                 android:name="com.google.android.maps.v2.API_KEY"
-                android:value="AIzaSyDGvE7Ay6GNlyRRnfKTFnpHOmSYKP27Ul8"/>
+                android:value="AIzaSyBhZLtz1CXE8-j0GnVMNQi4QF9qVLF-GRc"/>
 
 
         <activity
-                android:name="se.tna.getluckyradar.RadarActivity"
+                android:name="se.tna.budgetradar.RadarActivity"
                 android:label="@string/app_name"
                 android:screenOrientation="portrait">
             <intent-filter>

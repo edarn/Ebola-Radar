@@ -5,11 +5,11 @@ android {
     buildToolsVersion "21.1.0"
 
     defaultConfig {
-        applicationId "se.tna.getluckyradar"
+        applicationId "se.tna.budgetradar"
         minSdkVersion 11
         targetSdkVersion 19
-        versionCode 4
-        versionName "1.3"
+        versionCode 1
+        versionName "1.0"
     }
     buildTypes {
         release {

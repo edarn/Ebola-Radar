@@ -1,16 +1,19 @@
-package se.tna.getluckyradar;
+package se.tna.budgetradar;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,18 +23,17 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.amazon.device.associates.AssociatesAPI;
-import com.amazon.device.associates.LinkService;
-import com.amazon.device.associates.NotInitializedException;
-import com.amazon.device.associates.OpenSearchPageRequest;
 import com.facebook.AppEventsLogger;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.FacebookDialog;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 
 
 public class RadarActivity extends Activity {
-    private static final int MAIN_TRACKER_ID = 1;
     ImageView radarView;
     ImageView redButton;
     ImageView retry;
@@ -45,10 +47,6 @@ public class RadarActivity extends Activity {
     ProgressBar progress;
     private UiLifecycleHelper uiHelper;
     private GoogleMap mMap;
-
-    private static final String APP_KEY = "6545a6092733453b9c8a9f7efea6a3ba"; // Sample Application Key. Replace this value with your Application Key.
-    final java.lang.String LOG_TAG = "GetLucky";
-
 
     RelativeLayout.LayoutParams redLayout;
 
@@ -72,7 +70,7 @@ public class RadarActivity extends Activity {
         retry = (ImageView) findViewById(R.id.retry);
         redLayout = (RelativeLayout.LayoutParams) redButton.getLayoutParams();
 
-        progress.setMax(1080);
+        progress.setMax(720);
 
         retry.setClickable(true);
         retry.setOnClickListener(new View.OnClickListener() {
@@ -89,24 +87,24 @@ public class RadarActivity extends Activity {
             public void onClick(View view) {
                 AlertDialog ad = new AlertDialog.Builder(RadarActivity.this).create();
                 ad.setCancelable(false); // This blocks the 'BACK' button
-                ad.setMessage(String.format("There is a %.1f%% chance that you will get lucky with this attractive person!", chance));
+                ad.setMessage("Det finns ingen möjlighet alls.");
                 ad.setButton(DialogInterface.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
                 });
-                ad.setButton(DialogInterface.BUTTON_POSITIVE, "Share on Facebook", new DialogInterface.OnClickListener() {
+                ad.setButton(DialogInterface.BUTTON_POSITIVE, "Dela på Facebook", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
 
                         FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(RadarActivity.this)
-                                .setLink("https://play.google.com/store/apps/details?id=se.tna.getluckyradar")
-                                .setCaption(String.format("I have a %.1f%% chance to Get Lucky tonight, what´s your chance?", chance))
-                                .setDescription("Download the Get Lucky app to improve your chances to Get Lucky!")
+                                .setLink("https://play.google.com/store/apps/details?id=se.tna.budgetradar")
+                                .setCaption("Det finns ingen chans.")
+                                .setDescription("Ladda hem appen för att hjälpa sveriges rikstad.")
                                 .build();
                         uiHelper.trackPendingDialogCall(shareDialog.present());
-                        Ads.trackScreenName("Share Lucky Result on Facebook");
+                        Ads.trackScreenName("Share on Faceboo Inner");
                     }
                 });
                 ad.show();
@@ -151,20 +149,21 @@ public class RadarActivity extends Activity {
             public void onClick(View v) {
 
                 FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(RadarActivity.this)
-                        .setLink("https://play.google.com/store/apps/details?id=se.tna.getluckyradar")
-                        .setCaption(String.format("I have a %.1f%% chance to Get Lucky tonight, what´s your chance?", chance))
-                        .setDescription("Download the Get Lucky app to improve your chances to Get Lucky!")
+                        .setLink("https://play.google.com/store/apps/details?id=se.tna.budgetradar")
+                        .setCaption("Det finns ingen chans.")
+                        .setDescription("Ladda hem appen för att hjälpa sveriges rikstad.")
                         .build();
                 uiHelper.trackPendingDialogCall(shareDialog.present());
                 Ads.trackScreenName("Share on Facebook");
             }
         });
 
+        /*
         TextView amazonButton = (TextView) findViewById(R.id.amazonButton);
         amazonButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Ads.trackScreenName("Amazon search flirt");
+                Ads.trackScreenName("budget");
                 OpenSearchPageRequest request = new OpenSearchPageRequest("flirt");
                 try {
                     LinkService linkService = AssociatesAPI.getLinkService();
@@ -174,10 +173,11 @@ public class RadarActivity extends Activity {
                 }
             }
         });
+        */
 
         Ads.setupGoogleAdwords(this, R.id.googleAdView);
-        Ads.setupGoogleAnalytics(this, "UA-56762502-3");
-        Ads.setupAmazonAds(this, APP_KEY, R.id.amazonAdView);
+        Ads.setupGoogleAnalytics(this, "UA-56762502-4");
+        //Ads.setupAmazonAds(this, APP_KEY, R.id.amazonAdView);
     }
 
 
@@ -223,7 +223,8 @@ public class RadarActivity extends Activity {
         chance = Math.random() * 80 + 10;
         randomizer = Math.random() - 0.5;
         text.setVisibility(View.INVISIBLE);
-        headline.setVisibility(View.INVISIBLE);
+        //headline.setVisibility(View.INVISIBLE);
+        headline.setText("Söker efter en budget!!");
         progress.setVisibility(View.VISIBLE);
         redButton.setAlpha(0f);
         if (te != null) {
@@ -234,7 +235,8 @@ public class RadarActivity extends Activity {
         }
         te = new Timer();
         tu = new TimerTask() {
-            int angle =0;
+            int angle = 0;
+
             @Override
             public void run() {
 
@@ -245,7 +247,7 @@ public class RadarActivity extends Activity {
                         progress.setProgress(angle);
                         angle += 1;
 
-                        if (angle == 1080) {
+                        if (angle == 720) {
                             te.cancel();
                             tu.cancel();
                             animation1.cancel();
@@ -254,7 +256,7 @@ public class RadarActivity extends Activity {
                             redButton.setVisibility(View.VISIBLE);
                             //radarView.setVisibility(View.INVISIBLE);
                             text.setVisibility(View.VISIBLE);
-                            headline.setVisibility(View.VISIBLE);
+                            headline.setText("Det kan finnas en budget!!");
                             progress.setVisibility(View.GONE);
 
                         }
@@ -312,7 +314,6 @@ public class RadarActivity extends Activity {
         AppEventsLogger.activateApp(this);
         restart();
 
-        /*
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         if (mMap != null) {
             mMap.getUiSettings().setZoomControlsEnabled(false);
@@ -335,7 +336,7 @@ public class RadarActivity extends Activity {
                     .build();                   // Creates a CameraPosition from the builder
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         }
-        */
+
     }
 
     @Override
