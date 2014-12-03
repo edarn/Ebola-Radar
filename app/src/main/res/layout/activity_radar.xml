@@ -5,12 +5,7 @@
               android:layout_height="match_parent"
               android:background="#000000">
 
-    <com.google.android.gms.ads.AdView android:id="@+id/googleAdView"
-                                       android:layout_width="match_parent"
-                                       android:layout_height="wrap_content"
-                                       android:layout_gravity="bottom"
-                                       ads:adSize="BANNER"
-                                       ads:adUnitId="ca-app-pub-0138803691600797/5395700498"/>
+
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/debug"/>
 
     <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
@@ -23,8 +18,10 @@
                               android:orientation="vertical">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                               android:id="@+id/headline"
-                              android:text="Det KAN finnas en lösning!"
+                              android:textAlignment="center"
                               android:layout_gravity="center_horizontal"
+                              android:layout_marginLeft="10dp"
+                              android:layout_marginRight="10dp"
                               android:textColor="#ff0000"
                               android:textSize="22sp"
                             />
@@ -123,6 +120,13 @@
                     android:id="@+id/amazonAdView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/> -->
+
+            <com.google.android.gms.ads.AdView android:id="@+id/googleAdView"
+                                               android:layout_width="match_parent"
+                                               android:layout_height="wrap_content"
+                                               android:layout_gravity="bottom"
+                                               ads:adSize="BANNER"
+                                               ads:adUnitId="ca-app-pub-0138803691600797/5395700498"/>
 
         </LinearLayout>
     </ScrollView>
