@@ -1,4 +1,4 @@
-package se.tna.budgetradar;
+package se.tna.budgetradarnew;
 
 import android.app.Activity;
 import android.util.Log;
@@ -23,10 +23,10 @@ import com.google.android.gms.analytics.Tracker;
  */
 public class Ads {
     private static final String LOG_TAG = "Ads Utility";
-
+    private static AdView adView;
     public static void setupGoogleAdwords(Activity activity, int resId)
     {
-        AdView adView = (AdView) activity.findViewById(resId);
+        adView = (AdView) activity.findViewById(resId);
         adView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
@@ -72,6 +72,12 @@ public class Ads {
         }
         amazonAd.loadAd();
         AssociatesAPI.initialize(new AssociatesAPI.Config(amazonAccountKey, activity));
+    }
+
+    public static void googleAdsDestroy() {
+        if (adView != null) {
+            adView.destroy();
+        }
     }
 
     static class SampleAdListener extends DefaultAdListener {

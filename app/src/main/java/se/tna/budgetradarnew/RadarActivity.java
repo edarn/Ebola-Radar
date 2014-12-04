@@ -1,4 +1,4 @@
-package se.tna.budgetradar;
+package se.tna.budgetradarnew;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -87,7 +87,7 @@ public class RadarActivity extends Activity {
             public void onClick(View view) {
                 AlertDialog ad = new AlertDialog.Builder(RadarActivity.this).create();
                 ad.setCancelable(false); // This blocks the 'BACK' button
-                ad.setMessage("Tyvärr, det var ingen bra budget. Försök gärna igen.");
+                ad.setMessage("Tyvärr, denna budget var kass. Försök gärna igen.");
                 ad.setButton(DialogInterface.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -99,9 +99,9 @@ public class RadarActivity extends Activity {
                     public void onClick(DialogInterface dialogInterface, int i) {
 
                         FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(RadarActivity.this)
-                                .setLink("https://play.google.com/store/apps/details?id=se.tna.budgetradar")
+                                .setLink("https://play.google.com/store/apps/details?id=se.tna.budgetradarnew")
                                 .setCaption("Var är vår budget?")
-                                .setDescription("Ladda hem appen för att hjälpa sveriges riksdag.")
+                                .setDescription("Ladda hem appen och försök hitta en bra budget.")
                                 .build();
                         uiHelper.trackPendingDialogCall(shareDialog.present());
                         Ads.trackScreenName("Share on Faceboo Inner");
@@ -149,9 +149,9 @@ public class RadarActivity extends Activity {
             public void onClick(View v) {
 
                 FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(RadarActivity.this)
-                        .setLink("https://play.google.com/store/apps/details?id=se.tna.budgetradar")
+                        .setLink("https://play.google.com/store/apps/details?id=se.tna.budgetradarnew")
                         .setCaption("Var är vår budget?")
-                        .setDescription("Ladda hem appen för att hjälpa sveriges riksdag.")
+                        .setDescription("Simulera chanserna till att hitta en bra budget!")
                         .build();
                 uiHelper.trackPendingDialogCall(shareDialog.present());
                 Ads.trackScreenName("Share on Facebook");
@@ -256,7 +256,7 @@ public class RadarActivity extends Activity {
                             redButton.setVisibility(View.VISIBLE);
                             //radarView.setVisibility(View.INVISIBLE);
                             text.setVisibility(View.VISIBLE);
-                            headline.setText("Det kan finnas en budget i närheten!");
+                            headline.setText("Det kan finnas en budget!");
                             progress.setVisibility(View.GONE);
 
                         }
@@ -305,14 +305,16 @@ public class RadarActivity extends Activity {
     }
 
     AlphaAnimation animation1;
-    double randomizer = Math.random() - 0.5;
+    double randomizer = Math.random() - 0.3;
 
     @Override
     protected void onResume() {
         super.onResume();
         uiHelper.onResume();
         AppEventsLogger.activateApp(this);
+
         restart();
+
 
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         if (mMap != null) {
@@ -358,5 +360,6 @@ public class RadarActivity extends Activity {
     public void onDestroy() {
         super.onDestroy();
         uiHelper.onDestroy();
+        Ads.googleAdsDestroy();
     }
 }
