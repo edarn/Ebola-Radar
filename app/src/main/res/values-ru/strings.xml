@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Эбола Радар</string>
+    <string name="ebola">эбола</string>
+    <string name="try_now">Попробуй сейчас!</string>
+    <string name="stay_safe">Будь готов к защите от злых вирусов.</string>
+    <string name="you_are_safe">Ты в безопасности!</string>
+    <string name="no_ebola_found">Лиц, инфицированных Эбола, не обнаруженно.</string>
+    <string name="shop_amazon">Узнать больше</string>
+</resources>
