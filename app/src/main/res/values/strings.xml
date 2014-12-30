@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="facebook_app_id">1493509174264836</string>>
 
     <string name="app_name">Ebola Radar</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
-    <string name="facebook_app_id">1493509174264836</string>>
+    <string name="ebola">ebola</string>
+    <string name="try_now">Try it now!</string>
+    <string name="stay_safe">Stay safe and prepared against evil viruses.</string>
+    <string name="you_are_safe">You are safe!</string>
+    <string name="no_ebola_found">No ebola infected persons could be found.</string>
+    <string name="shop_amazon">Learn More</string>
+
 
 </resources>

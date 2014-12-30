@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -77,8 +78,8 @@ public class RadarActivity extends Activity implements
             public void onClick(View v) {
                 FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(RadarActivity.this)
                         .setLink("https://play.google.com/store/apps/details?id=se.tna.ebolaradar")
-                        .setDescription("Stay safe and prepared against evil viruses.")
-                        .setCaption("Try it now!")
+                        .setDescription(getString(R.string.stay_safe))
+                        .setCaption(getString(R.string.try_now))
                         .build();
                 uiHelper.trackPendingDialogCall(shareDialog.present());
                 Ads.trackScreenName("Share on Facebook");
@@ -89,7 +90,7 @@ public class RadarActivity extends Activity implements
         amazonButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                OpenSearchPageRequest request = new OpenSearchPageRequest("ebola");
+                OpenSearchPageRequest request = new OpenSearchPageRequest(getString(R.string.ebola));
                 try {
                     LinkService linkService = AssociatesAPI.getLinkService();
                     linkService.openRetailPage(request);

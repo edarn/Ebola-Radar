@@ -21,7 +21,7 @@
                               android:orientation="vertical">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                               android:id="@+id/headline"
-                              android:text="You are safe!"
+                              android:text="@string/you_are_safe"
                               android:layout_gravity="center_horizontal"
                               android:textColor="#ff0000"
                               android:visibility="invisible"
@@ -30,7 +30,7 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                               android:id="@+id/text"
-                              android:text="No ebola infected persons could be found."
+                              android:text="@string/no_ebola_found"
                               android:layout_gravity="center_horizontal"
                               android:textColor="#00ff00"
                               android:visibility="invisible"
@@ -97,7 +97,7 @@
                           android:layout_gravity="center_vertical"
                           android:drawableBottom="@drawable/amazonbutton"
 
-                          android:text="Learn More" android:textSize="18sp" android:textColor="#ffffff"/>
+                          android:text="@string/shop_amazon" android:textSize="18sp" android:textColor="#ffffff"/>
             </LinearLayout>
            <!-- <com.amazon.device.ads.AdLayout
                     android:id="@+id/ad_view"
