@@ -2,15 +2,13 @@ package se.tna.ebolaradar;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.*;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -24,26 +22,27 @@ import com.amazon.device.associates.OpenSearchPageRequest;
 import com.facebook.AppEventsLogger;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.FacebookDialog;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.analytics.GoogleAnalytics;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.amazon.device.ads.*;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 
 
-public class RadarActivity extends Activity {
+public class RadarActivity extends Activity implements
+                                            LocationListener,
+                                            GoogleApiClient.ConnectionCallbacks,
+                                            GoogleApiClient.OnConnectionFailedListener {
     private static final int MAIN_TRACKER_ID = 1;
-    int i = 0;
     ImageView radarView;
     View button;
     TextView headline, text;
-    Tracker mainTracker;
 
     Timer te;
     TimerTask tu;
@@ -52,8 +51,10 @@ public class RadarActivity extends Activity {
     private GoogleMap mMap;
 
     private static final String AMAZON_APP_KEY = "6545a6092733453b9c8a9f7efea6a3ba";
-    final java.lang.String LOG_TAG = "GetLucky";
-    private AdLayout amazonAd;
+    private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
+    private static final long POLLING_FREQ = 1000 * 30;
+    private static final long FASTEST_UPDATE_FREQ = 1000 * 5;
 
 
     @Override
@@ -65,6 +66,8 @@ public class RadarActivity extends Activity {
         uiHelper.onCreate(savedInstanceState);
         progress = (ProgressBar) findViewById(R.id.progress);
         radarView = (ImageView) findViewById(R.id.radar);
+        progress.setMax(720);
+
         headline = (TextView) findViewById(R.id.headline);
         text = (TextView) findViewById(R.id.text);
         button = findViewById(R.id.button);
@@ -78,10 +81,8 @@ public class RadarActivity extends Activity {
                         .setCaption("Try it now!")
                         .build();
                 uiHelper.trackPendingDialogCall(shareDialog.present());
-                if (mainTracker != null) {
-                    mainTracker.setScreenName("Share on Facebook");
-                    mainTracker.send(new HitBuilders.AppViewBuilder().build());
-                }
+                Ads.trackScreenName("Share on Facebook");
+
             }
         });
         TextView amazonButton = (TextView) findViewById(R.id.amazonButton);
@@ -92,46 +93,24 @@ public class RadarActivity extends Activity {
                 try {
                     LinkService linkService = AssociatesAPI.getLinkService();
                     linkService.openRetailPage(request);
-                    if (mainTracker != null) {
-                        mainTracker.setScreenName("Shop on Amazon");
-                        mainTracker.send(new HitBuilders.AppViewBuilder().build());
-                    }
+                    Ads.trackScreenName("Shop on Amazon - Ebola");
                 } catch (NotInitializedException e) {
                 }
             }
         });
 
-        AdView adView = (AdView) this.findViewById(R.id.adView);
-        adView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        adView.loadAd(adRequest);
-
-        GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
-        mainTracker = analytics.newTracker(R.xml.global_tracker);
-        mainTracker.setAppId("UA-56762502-2");
-        mainTracker.enableAutoActivityTracking(true);
-        mainTracker.enableAdvertisingIdCollection(true);
-        mainTracker.enableExceptionReporting(true);
-
+        Ads.setupGoogleAdwords(this, R.id.googleAdsViewTop);
+        Ads.setupGoogleAdwords(this, R.id.googleAdsViewBottom);
+        Ads.setupGoogleAnalytics(this, "UA-56762502-2");
+        Ads.setupAmazonAds(this, AMAZON_APP_KEY, 0);
         progress.setMax(720);
-        // For debugging purposes enable logging, but disable for production builds.
-        AdRegistration.enableLogging(false);
-        // For debugging purposes flag all ad requests as tests, but set to false for production builds.
-        AdRegistration.enableTesting(false);
 
+        buildGoogleApiClient();
 
-        amazonAd = (AdLayout) findViewById(R.id.ad_view);
-        amazonAd.setListener(new SampleAdListener());
-        try {
-            AdRegistration.setAppKey(AMAZON_APP_KEY);
-        } catch (final IllegalArgumentException e) {
-            Log.e(LOG_TAG, "IllegalArgumentException thrown: " + e.toString());
-            return;
-        }
-
-        amazonAd.loadAd();
-        AssociatesAPI.initialize(new AssociatesAPI.Config(AMAZON_APP_KEY, this));
-
+        mLocationRequest = LocationRequest.create();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(POLLING_FREQ);
+        mLocationRequest.setFastestInterval(FASTEST_UPDATE_FREQ);
 
     }
 
@@ -168,17 +147,16 @@ public class RadarActivity extends Activity {
     protected void onResume() {
         super.onResume();
         uiHelper.onResume();
-        i = 0;
         text.setVisibility(View.INVISIBLE);
         headline.setVisibility(View.INVISIBLE);
         progress.setVisibility(View.VISIBLE);
         AppEventsLogger.activateApp(this);
 
-        mainTracker.setScreenName("Radar activity resumed.");
-        mainTracker.send(new HitBuilders.AppViewBuilder().build());
+        Ads.trackScreenName("Radar activity resumed.");
 
         te = new Timer();
         tu = new TimerTask() {
+            int angle = 0;
 
             @Override
             public void run() {
@@ -186,10 +164,11 @@ public class RadarActivity extends Activity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        radarView.setRotation(i);
-                        i += 1;
-                        progress.setProgress(i);
-                        if (i == 720) {
+                        radarView.setRotation(angle);
+                        progress.setProgress(angle);
+                        angle += 1;
+                        if (angle == 720) {
+
                             text.setVisibility(View.VISIBLE);
                             headline.setVisibility(View.VISIBLE);
                             progress.setVisibility(View.GONE);
@@ -200,38 +179,30 @@ public class RadarActivity extends Activity {
             }
         };
 
-
         te.scheduleAtFixedRate(tu, 1, 10);
 
-
         mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-        if (mMap != null) {
-            mMap.getUiSettings().setZoomControlsEnabled(false);
-            mMap.getUiSettings().setZoomGesturesEnabled(false);
-            mMap.getUiSettings().setAllGesturesEnabled(false);
+
+        if (mMap == null) {
+            return;
         }
 
+        mMap.getUiSettings().setZoomControlsEnabled(false);
+        mMap.getUiSettings().setZoomGesturesEnabled(false);
+        mMap.getUiSettings().setAllGesturesEnabled(false);
 
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        Criteria criteria = new Criteria();
-
-
-        Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        if (location != null && mMap != null)
-        {
-
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(location.getLatitude(), location.getLongitude()), 13));
-
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to location user
-                    .zoom(15)                   // Sets the zoom
-                    .bearing(0)                // Sets the orientation of the camera to east
-                    .build();                   // Creates a CameraPosition from the builder
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
         }
+    }
 
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
     }
 
     @Override
@@ -247,6 +218,10 @@ public class RadarActivity extends Activity {
         AppEventsLogger.deactivateApp(this);
         te.cancel();
         tu.cancel();
+
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
     }
 
     @Override
@@ -254,39 +229,48 @@ public class RadarActivity extends Activity {
         super.onDestroy();
         uiHelper.onDestroy();
     }
-    class SampleAdListener extends DefaultAdListener {
-        /**
-         * This event is called once an ad loads successfully.
-         */
-        @Override
-        public void onAdLoaded(final Ad ad, final AdProperties adProperties) {
-            Log.i(LOG_TAG, adProperties.getAdType().toString() + " ad loaded successfully.");
-        }
 
-        /**
-         * This event is called if an ad fails to load.
-         */
-        @Override
-        public void onAdFailedToLoad(final Ad ad, final AdError error) {
-            Log.w(LOG_TAG, "Ad failed to load. Code: " + error.getCode() + ", Message: " + error.getMessage());
-        }
+    @Override
+    public void onConnected(Bundle bundle) {
 
-        /**
-         * This event is called after a rich media ad expands.
-         */
-        @Override
-        public void onAdExpanded(final Ad ad) {
-            Log.i(LOG_TAG, "Ad expanded.");
-            // You may want to pause your activity here.
-        }
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
 
-        /**
-         * This event is called after a rich media ad has collapsed from an expanded state.
-         */
-        @Override
-        public void onAdCollapsed(final Ad ad) {
-            Log.i(LOG_TAG, "Ad collapsed.");
-            // Resume your activity here, if it was paused in onAdExpanded.
+        // Schedule a runnable to unregister location listeners
+        Executors.newScheduledThreadPool(1).schedule(new Runnable() {
+
+            @Override
+            public void run() {
+                LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, RadarActivity.this);
+            }
+
+        }, TimeUnit.MINUTES.toMillis(3), TimeUnit.MILLISECONDS);
+
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        if (location != null) {
+
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(location.getLatitude(), location.getLongitude()), 13));
+
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to location user
+                    .zoom(15)                   // Sets the zoom
+                    .bearing(0)                // Sets the orientation of the camera to east
+                    .build();                   // Creates a CameraPosition from the builder
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         }
     }
 }

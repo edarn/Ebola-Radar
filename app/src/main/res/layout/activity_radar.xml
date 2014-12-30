@@ -5,7 +5,7 @@
               android:layout_height="match_parent"
               android:background="#000000">
 
-    <com.google.android.gms.ads.AdView android:id="@+id/adView"
+    <com.google.android.gms.ads.AdView android:id="@+id/googleAdsViewTop"
                                        android:layout_width="match_parent"
                                        android:layout_height="wrap_content"
                                        android:layout_gravity="bottom"
@@ -99,10 +99,18 @@
 
                           android:text="Learn More" android:textSize="18sp" android:textColor="#ffffff"/>
             </LinearLayout>
-            <com.amazon.device.ads.AdLayout
+           <!-- <com.amazon.device.ads.AdLayout
                     android:id="@+id/ad_view"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"/> -->
+
+            <com.google.android.gms.ads.AdView android:id="@+id/googleAdsViewBottom"
+                                               android:layout_width="match_parent"
+                                               android:layout_height="wrap_content"
+                                               android:layout_gravity="bottom"
+                                               ads:adSize="BANNER"
+                                               ads:adUnitId="ca-app-pub-0138803691600797/9416894494"/>
+
 
         </LinearLayout>
     </ScrollView>
