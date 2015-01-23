@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="facebook_app_id">1493509174264836</string>
+
     <string name="app_name">Эбола Радар</string>
     <string name="ebola">эбола</string>
     <string name="try_now">Попробуй сейчас!</string>
